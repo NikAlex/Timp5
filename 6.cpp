@@ -2,101 +2,75 @@
 #include <string>
 using namespace std;
 
-class Tree{
-	int k;
-	int *p1;
-	int*p2;
+class Orgraf{
 public:
-	Tree() : p1(0), p2(0), k(0){}
-	~Tree(){
-		if (p1) delete [] p1;
-		if (p2) delete [] p2;
-	}
-	void add(int x){ 
-		int z = 0;
-		if (p1 == 0){
-			if (p2 == 0) { k++; p1 = new int[1]; p1[0] = x; goto exit1; }
-				for (int i = 0; i < k - 1; i++){
-					if (x < p2[i]) { z = i;  goto hh; }
-					if ((2 * i + 1) <= k - 1) { if (x < p2[2 * i + 1]) { z = (2 * i + 1); goto hh; } }
-					if ((2 * i + 2) <= k - 1) { if (x < p2[2 * i + 2]) { z = (2 * i + 2); goto hh; } }
+		Orgraf(int _V): V(_V), E(0){
+			M = new int*[V];
+			for (int i = 0; i < V; i++) {
+				M[i] = new int[V];
+				for (int j = 0; j < V; j++){
+					if (j == i) M[i][j] = 0;
+					else M[i][j] = -1;
 				}
-				if (!z){
-					k++;
-					p1 = new int[k];
-					for (int i = 0; i < k - 1; i++) p1[i] = p2[i];
-					p1[k - 1] = x; goto exit1;
-				}
-			hh: k++; 
-				p1 = new int[k];
-				for (int i = 0; i < z; i++) p1[i] = p2[i];
-				p1[z] = x;
-				for (int i = (z + 1); i < k; i++) p1[i] = p2[i - 1];
-				exit1: if (p2 != 0) { delete[] p2; p2 = 0; return; }
-			return;
-		}
-		else{
-			if (p2 == 0){
-				for (int i = 0; i < k; i++){
-					if (x < p1[i]) { k++; p2 = new int[k]; p2[0] = x; for (int i = 1; i < k; i++) p2[i] = p1[i - 1]; goto exit2; }
-					if ((2 * i + 1) <= k - 1) { if (x < p1[2 * i + 1]) { z = (2 * i + 1); goto dd; } }
-					if ((2 * i + 2) <= k - 1) { if (x < p1[2 * i + 2]) { z = (2 * i + 2); goto dd; } }
-				}
-				if (!z){
-						k++;
-						p2 = new int[k];
-						for (int i = 0; i < k - 1; i++) p2[i] = p1[i];
-						p2[k-1] = x; goto exit2;
-					}
-			dd: k++; 
-					p2 = new int[k];
-					for (int i = 0; i < z; i++) p2[i] = p1[i];
-					p2[z] = x;
-					for (int i = (z + 1); i < k; i++) p2[i] = p1[i - 1];
-					exit2: if (p1 != 0) { delete[] p1; p1 = 0; return; }
-				}
-			return;
 			}
+			r = new int[V];
+			for (int i = 0; i < V; i++) r[i] = -1;
 		}
-	void get(){
-		if (p1) cout << p1[0] << endl; 
-		if (p2) cout << p2[0] << endl; 
-	}
-	void del(){
-		k--;
-		if (p1){
-			p2 = new int[k];
-			for (int i = 0; i < k; i++) p2[i] = p1[i + 1];
-			delete[] p1; p1 = 0; return;
+		void add(int v1, int v2, int w){
+			M[v1][v2] = w;
+			E++;
 		}
-		if (p2){
-			p1 = new int[k]; 
-			for (int i = 0; i < k; i++) p1[i] = p2[i + 1];
-			delete[] p2; p2 = 0;
+		void Alg_Deigstry(int N){
+			r[N] = 0;
+			bool *added = new bool[V]; int /*x = -1,*/ y = N;
+			for (int i = 0; i < V; i++) added[i] = 0;
+			for (int i = 1; i < V; i++){
+				int x = -1;
+				for (int j = 1; j < V; j++){
+					if (!(added[j])){
+						if (r[j] == -1) {
+							if (M[N][j] != -1){
+								r[j] = r[N] + M[N][j]; if (x == -1 && y == N) { x = r[j]; y = j; }
+								else{
+									if (r[j] < x) { x = r[j]; }
+								}
+							}
+						}
+						else {
+							if (M[N][j] != -1){
+								if(M[N][j] < r[j]) {
+									r[j] = r[N] + M[N][j];
+									if (x == -1 && y == N) { x = r[j]; y = j; }
+									else if (r[j] < x) { x = r[j]; y = j; }
+								}
+							else { x = r[j]; y = j; }
+							}
+						}
+					}
+				}
+				N = y; 
+				added[N] = true;
+			}
+			for (int i = 0; i < V; i++) cout << r[i] << " "; cout << endl;
 		}
-	}
+private:
+	int V;
+	int E;
+	int** M;
+	int* r;
 };
 
 void main(){
-	Tree T;  int n; string s;
-	cin >> n;
-	while (n){
-		getline(cin, s);
-		if (!s.find("add")){
-			n--;
-			s.erase(0, 4);
-			int x = atoi(s.c_str()); 
-			T.add(x);
-		}
-		if (s == "del"){
-			n--;
-			T.del();
-		}
-		if (s == "get"){
-			n--;
-			T.get();
-		}
+	int V, E, N;
+	cin >> V >> E;
+	Orgraf G(V);
+	cin >> N;
+	for (int i = 0; i < E; i++){
+		int v1, v2, w;
+		cin >> v1 >> v2 >> w;
+		G.add(v1, v2, w);
 	}
+	G.Alg_Deigstry(N);
 	system("pause");
 }
 
