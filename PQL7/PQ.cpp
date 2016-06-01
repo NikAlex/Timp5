@@ -1,4 +1,4 @@
-#include "PriorQueue.h"
+#include "PQ.h"
 
 IQueue * GetIQueue()
 {
